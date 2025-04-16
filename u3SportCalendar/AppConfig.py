@@ -10,11 +10,13 @@ class AppConfig:
         }
         with open("config.json", "w") as jsonfile:
             json.dump(data, jsonfile)
+            jsonfile.close()
 
     def load(self):
         with open("config.json", "r") as jsonfile:
             data = json.load(jsonfile)
             self.events_calendar = data["events_calendar"]
+            jsonfile.close()
 
     def get_events_calendar(self) -> str:
         return self.events_calendar
