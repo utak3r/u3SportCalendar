@@ -74,3 +74,29 @@ def test_get_as_text(name,
         end = datetime.datetime(end_year, end_month, end_day, end_hour, end_minute)
     event = Event(name, start, end)
     assert event.get_as_text() == expected_string
+
+def test_list_add_get_count():
+    events = EventsList()
+    assert len(events) == 0
+    events.add_event_params("test 1", datetime.datetime.now(), None)
+    assert len(events) == 1
+    events.add_event(Event("test 2", datetime.datetime.now(), None))
+    assert len(events) == 2
+    assert events[0].name() == "test 1"
+    assert events[1].name() == "test 2"
+
+def test_list_iterator():
+    events = EventsList()
+    events.add_event_params("test 1", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 2", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 3", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 4", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 5", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 6", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+
+    assert len(events) == 6
+    counter = 0
+    for event in events:
+        assert event.name() == events[counter].name()
+        counter += 1
+    assert counter == 6

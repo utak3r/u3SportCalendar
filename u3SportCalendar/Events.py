@@ -54,11 +54,31 @@ class Event:
 class EventsList:
     def __init__(self):
         self.the_list = []
+        self.iter_counter = 0
 
     def __getitem__(self, key) -> Event:
         return self.the_list[key]
 
-    def add_event(self, name, start, end):
+    def add_event_params(self, name, start, end):
         event = Event(name, start, end)
         self.the_list.append(event)
     
+    def add_event(self, event: Event):
+        if (event is not None):
+            self.the_list.append(event)
+
+    def __len__(self):
+        return len(self.the_list)
+    
+    def __iter__(self):
+        self.iter_counter = 0
+        return self
+    
+    def __next__(self):
+        if (self.iter_counter < len(self.the_list)):
+            ret = self.the_list[self.iter_counter]
+            self.iter_counter += 1
+            return ret
+        else:
+            raise StopIteration
+
