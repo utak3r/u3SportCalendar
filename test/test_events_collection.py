@@ -176,3 +176,25 @@ def test_lists_addition():
     length = len(events_yet_another)
     events_yet_another += events_another
     assert len(events_yet_another) == length + len(events_another)
+
+def test_trim_dates():
+    events = EventsList()
+    events.add_event_params("test 1", datetime.datetime.now() + datetime.timedelta(days=2), None)
+    events.add_event_params("test 2", datetime.datetime.now() + datetime.timedelta(days=5), None)
+    events.add_event_params("test 3", datetime.datetime.now() - datetime.timedelta(days=2), None)
+    events.add_event_params("test 4", datetime.datetime.now() + datetime.timedelta(days=1), None)
+    events.add_event_params("test 5", datetime.datetime.now() + datetime.timedelta(days=7), None)
+    events.add_event_params("test 6", datetime.datetime.now() + datetime.timedelta(days=10), None)
+    events.add_event_params("test 7", datetime.datetime.now() + datetime.timedelta(days=6), None)
+    events.add_event_params("test 8", datetime.datetime.now() - datetime.timedelta(days=1), None)
+    events.add_event_params("test 9", datetime.datetime.now() + datetime.timedelta(days=15), None)
+    events.add_event_params("test 10", datetime.datetime.now() + datetime.timedelta(days=20), None)
+
+    events_trimmed = events.trim_dates(0)
+    assert len(events_trimmed) == 10
+
+    events_trimmed = events.trim_dates(6)
+    assert len(events_trimmed) == 4
+
+    events_trimmed = events.trim_dates(8)
+    assert len(events_trimmed) == 5

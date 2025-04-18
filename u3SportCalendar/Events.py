@@ -150,6 +150,18 @@ class EventsList:
         if (event is not None):
             self.the_list.append(event)
 
+    def trim_dates(self, days_count:int):
+        if (days_count > 0):
+            today = datetime.datetime.now()
+            last_date = today + datetime.timedelta(days=days_count)
+            new_list = EventsList()
+            for event in self:
+                if (event.start() >= today and event.start() <= last_date):
+                    new_list.add_event(event)
+            return new_list
+        else:
+            return self
+
     def toJson(self) -> str:
         return json.dumps(self, cls=EventsEncoder)
 
