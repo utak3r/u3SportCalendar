@@ -1,4 +1,6 @@
 import datetime
+import json
+from json import JSONEncoder, JSONDecoder
 
 class EventException(Exception):
     def __init__(self, msg):
@@ -6,26 +8,81 @@ class EventException(Exception):
         print('EventException exception occured')
 
 
-class Event:
-    def __init__(self, name:str="", start:datetime=None, end:datetime=None):
+class EventsEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return {
+                "__class__": "datetime",
+                "y": obj.year,
+                "month": obj.month,
+                "d": obj.day,
+                "h": obj.hour,
+                "minute": obj.minute,
+                "s": obj.second 
+            }
+        if (isinstance(obj, Event)):
+            return {
+                "__class__": "Event",
+                "name": obj.name(),
+                "start": obj.start(),
+                "end": obj.end()
+            }
+        if (isinstance(obj, EventsList)):
+            return {
+                "__class__": "EventsList",
+                "events": obj.the_list
+            }
+        return JSONEncoder.default(self, obj)
+
+class EventsDecoder(JSONDecoder):
+    def __init__(self):
+        JSONDecoder.__init__(self, object_hook=EventsDecoder.from_dict)
+
+    @staticmethod
+    def from_dict(dict):
+        if dict.get("__class__") == "datetime":
+            return datetime.datetime(
+                dict["y"], dict["month"], dict["d"],
+                dict["h"], dict["minute"], dict["s"]
+                )
+        if dict.get("__class__") == "Event":
+            return Event(
+                name=dict["name"], start=dict["start"], end=dict["end"]
+            )
+        if dict.get("__class__") == "EventsList":
+            lista = EventsList()
+            lista.the_list = dict["events"]
+            return lista
+        return dict
+
+
+class Event():
+    def __init__(self, name:str="", start:datetime.datetime=None, end:datetime.datetime=None):
         self.the_name = name
-        self.the_start = start
-        self.the_end = end
+        self.the_start = None
+        if (start is not None):
+            self.the_start = start.replace(second=0).replace(microsecond=0)
+        self.the_end = None
+        if (end is not None):
+            self.the_end = end.replace(second=0).replace(microsecond=0)
         if (start is not None and end is not None):
             if (end < start):
-                self.the_end = start
+                self.the_end = start.replace(second=0).replace(microsecond=0)
                 raise EventException("End date is sooner than start date.")
             
+    def toJson(self) -> str:
+        return json.dumps(self, cls=EventsEncoder)
+    
     def name(self) -> str:
         return self.the_name
     
-    def start(self) -> datetime:
+    def start(self) -> datetime.datetime:
         return self.the_start
     
     def start_iso(self) -> str:
         return self.the_start.isoformat(timespec='seconds')
     
-    def end(self) -> datetime:
+    def end(self) -> datetime.datetime:
         return self.the_end
 
     def end_iso(self) -> str:
@@ -37,6 +94,22 @@ class Event:
             duration = self.the_end - self.the_start
         return duration
     
+    def __str__(self):
+        return self.get_as_text()
+    
+    def __eq__(self, other):
+        return (
+            self.name() == other.name() and
+            self.start() == other.start() and
+            self.end() == other.end()
+        )
+    
+    def __gt__(self, other):
+        return (self.start() > other.start())
+    
+    def __lt__(self, other):
+        return (self.start() < other.start())
+
     def get_as_text(self) -> str:
         text = ""
         if (self.the_name != ""):
@@ -66,6 +139,9 @@ class EventsList:
     def add_event(self, event: Event):
         if (event is not None):
             self.the_list.append(event)
+
+    def toJson(self) -> str:
+        return json.dumps(self, cls=EventsEncoder)
 
     def __len__(self):
         return len(self.the_list)
