@@ -6,6 +6,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from u3SportCalendar.Events import Event, EventsList
 
 class GoogleCalendar:
 
@@ -47,7 +48,7 @@ class GoogleCalendar:
         # Można podać milisekundy, ale zostaną one zignorowane.
         # singleEvents - czy rozwijać wydarzenia cykliczne do pojedynczych wystąpień.
 
-        events = None
+        events = EventsList()
         if (self.creds is not None):
             if (self.api_service_resource is not None):
                 timeMin = timeStart.isoformat(timespec='seconds')
@@ -64,7 +65,18 @@ class GoogleCalendar:
                         )
                         .execute()
                     )
-                    events = events_result.get("items", [])
+                    events_api = events_result.get("items", [])
+                    print(events_api)
+                    for event in events_api:
+                        summary = event["summary"]
+                        start = datetime.datetime.fromisoformat(event["start"].get("dateTime", event["start"].get("date")))
+                        end = datetime.datetime.fromisoformat(event["end"].get("dateTime", event["end"].get("date")))
+                        local_tz = datetime.datetime.now().astimezone().tzinfo
+                        start = start.astimezone(local_tz)
+                        end = end.astimezone(local_tz)
+                        events.add_event(Event(summary, start, end))
+                        #print(f"{summary}: {start} - {end}")
+
                 except HttpError as error:
                     print(f"An error occurred: {error}")
             else:
