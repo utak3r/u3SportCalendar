@@ -98,6 +98,12 @@ class Event():
             duration = self.the_end - self.the_start
         return duration
     
+    def same_name_and_date_without_time(self, another) -> bool:
+        return (
+            self.name() == another.name() and
+            self.start().date() == another.start().date()
+        )
+    
     def __str__(self):
         return self.get_as_text()
     

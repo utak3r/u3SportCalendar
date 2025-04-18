@@ -82,6 +82,23 @@ def test_get_as_text(name,
     event = Event(name, start, end)
     assert event.get_as_text() == expected_string
 
+comparing_without_hour_test_data = [
+    ("event 1", 2025, 4, 18, 19, 20, "event 2", 2025, 4, 18, 19, 20, False),
+    ("event 1", 2025, 4, 18, 19, 20, "event 1", 2025, 4, 18, 19, 20, True),
+    ("event 1", 2025, 4, 18, 19, 20, "event 1", 2025, 4, 18, 12, 0, True),
+    ("event 1", 2025, 4, 18, 19, 20, "event 11", 2025, 4, 18, 12, 0, False),
+]
+@pytest.mark.parametrize("name1, year, month, day, hour, minute, " \
+                         "name2, year2, month2, day2, hour2, minute2, " \
+                         "expected_result", comparing_without_hour_test_data)
+def test_comparing_without_hour(name1, year, month, day, hour, minute, 
+                                name2, year2, month2, day2, hour2, minute2, 
+                                expected_result
+                                ):
+    event1 = Event(name1, datetime.datetime(year, month, day, hour, minute))
+    event2 = Event(name2, datetime.datetime(year2, month2, day2, hour2, minute2))
+    assert event1.same_name_and_date_without_time(event2) == expected_result
+
 def test_list_add_get_count():
     events = EventsList()
     assert len(events) == 0
