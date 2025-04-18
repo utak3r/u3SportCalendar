@@ -166,3 +166,16 @@ class EventsList:
         else:
             raise StopIteration
 
+    def __add__(self, other):
+        new_list = EventsList()
+        for event in self:
+            new_list.add_event(event)
+        for event in other:
+            new_list.add_event(event)
+        return new_list
+    
+    def __iadd__(self, other):
+        for event in other:
+            self.add_event(event)
+        return self
+        

@@ -137,3 +137,25 @@ def test_serialization():
     assert events[3] == events_deserialized[3]
     assert events[4] == events_deserialized[4]
     assert events[5] == events_deserialized[5]
+
+def test_lists_addition():
+    events = EventsList()
+    events.add_event_params("test 1", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 2", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 3", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+
+    events_another = EventsList()
+    events_another.add_event_params("test 4", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events_another.add_event_params("test 5", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events_another.add_event_params("test 6", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+
+    events_joined = events + events_another
+    assert len(events_joined) == len(events) + len(events_another)
+
+    events_yet_another = EventsList()
+    events.add_event_params("test 1", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 2", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    events.add_event_params("test 3", datetime.datetime.now(), datetime.datetime.now() + datetime.timedelta(hours=2))
+    length = len(events_yet_another)
+    events_yet_another += events_another
+    assert len(events_yet_another) == length + len(events_another)
