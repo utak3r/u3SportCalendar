@@ -10,8 +10,10 @@ if __name__ == "__main__":
     config = AppConfig()
     config.load()
     events_calendar = config.get_events_calendar()
+    days_forward = config.get_how_many_days()
+    config.save()
 
-    use_google_calendar = False
+    use_google_calendar = True
     use_bets_scraper = True
 
     if (use_bets_scraper):
@@ -19,6 +21,7 @@ if __name__ == "__main__":
         events = EventsList()
         #scraper.get_events("ts/17230/Arsenal", events)
         scraper.get_events("ts/43934/Pogon-Szczecin", events)
+        events = events.trim_dates(days_forward)
         for event in events:
             print(f"{event.get_as_text()}\n")
 
@@ -29,13 +32,11 @@ if __name__ == "__main__":
         calendar.build_service()
 
         start = datetime.datetime.now(tz=datetime.timezone.utc)
-        end = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=7)
+        end = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=days_forward)
 
         events = calendar.get_events(events_calendar, start, end)
-        for event in events:
-            start = event["start"].get("dateTime", event["start"].get("date"))
-            print(start, event["summary"])
+        events_json = events.toJson()
 
-        if not events:
+        if (len(events) == 0):
             print("No upcoming events found.")
             
