@@ -73,6 +73,10 @@ class Event():
     def toJson(self) -> str:
         return json.dumps(self, cls=EventsEncoder)
     
+    @classmethod
+    def fromJson(cls, serialized):
+        return json.loads(serialized, cls=EventsDecoder)
+    
     def name(self) -> str:
         return self.the_name
     
@@ -142,6 +146,10 @@ class EventsList:
 
     def toJson(self) -> str:
         return json.dumps(self, cls=EventsEncoder)
+
+    @classmethod
+    def fromJson(cls, serialized):
+        return json.loads(serialized, cls=EventsDecoder)
 
     def __len__(self):
         return len(self.the_list)
