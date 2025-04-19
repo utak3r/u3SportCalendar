@@ -172,6 +172,25 @@ class EventsList:
             return new_list
         else:
             return self
+        
+    def prepare_updates_lists(self, new_events_list, update_hour:bool=True):
+        # This is comparing a list of new events with a current list.
+        # Returns two lists: events to remove from a calendar and events to add to it.
+        # If update_hour is true, if there's an event of the same name and date,
+        # but with a different start hour, remove the old one and add the new one.
+        list_to_remove = EventsList()
+        list_to_add = EventsList()
+
+        for new_event in new_events_list:
+            if (new_event not in self):
+                if (update_hour):
+                    for existing_event in self:
+                        # check if it's an updated hour of an existing event
+                        if (existing_event.same_name_and_date_without_time(new_event)):
+                            list_to_remove.add_event(existing_event)
+                list_to_add.add_event(new_event)
+
+        return (list_to_remove, list_to_add)
 
     def toJson(self) -> str:
         return json.dumps(self, cls=EventsEncoder)

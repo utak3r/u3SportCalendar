@@ -198,3 +198,21 @@ def test_trim_dates():
 
     events_trimmed = events.trim_dates(8)
     assert len(events_trimmed) == 5
+
+def test_prepare_updates_lists():
+    existing_events = EventsList()
+    existing_events.add_event(Event("Event 1", datetime.datetime(2025, 4, 20, 18, 30), datetime.datetime(2025, 4, 20, 20, 0)))
+    existing_events.add_event(Event("Event 2", datetime.datetime(2025, 4, 22, 17, 0), datetime.datetime(2025, 4, 22, 19, 0)))
+    existing_events.add_event(Event("Event 3", datetime.datetime(2025, 4, 25, 12, 15), datetime.datetime(2025, 4, 25, 13, 30)))
+    existing_events.add_event(Event("Event 4", datetime.datetime(2025, 4, 28, 20, 0), datetime.datetime(2025, 4, 28, 21, 45)))
+    existing_events.add_event(Event("Event 5", datetime.datetime(2025, 4, 30, 19, 45), datetime.datetime(2025, 4, 30, 21, 0)))
+
+    newly_downloaded_events = EventsList()
+    newly_downloaded_events.add_event(Event("Event 1", datetime.datetime(2025, 4, 20, 18, 30), datetime.datetime(2025, 4, 20, 20, 0)))
+    newly_downloaded_events.add_event(Event("Event 6", datetime.datetime(2025, 5, 2, 20, 0), datetime.datetime(2025, 5, 2, 22, 0)))
+    newly_downloaded_events.add_event(Event("Event 3", datetime.datetime(2025, 4, 25, 13, 0), datetime.datetime(2025, 4, 25, 15, 0)))
+    newly_downloaded_events.add_event(Event("Event 7", datetime.datetime(2025, 5, 7, 15, 30), datetime.datetime(2025, 5, 7, 17, 0)))
+
+    (tobe_removed, tobe_added) = existing_events.prepare_updates_lists(newly_downloaded_events, True)
+    assert len(tobe_removed) == 1
+    assert len(tobe_added) == 3
