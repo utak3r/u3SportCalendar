@@ -9,8 +9,8 @@ def test_event_creation():
     end = datetime.datetime.now() + datetime.timedelta(hours=1)
     event = Event(name, start, end)
     assert event.name() == name
-    assert event.start() == start.replace(second=0).replace(microsecond=0)
-    assert event.end() == end.replace(second=0).replace(microsecond=0)
+    assert event.start() == start.replace(second=0).replace(microsecond=0).astimezone()
+    assert event.end() == end.replace(second=0).replace(microsecond=0).astimezone()
 
     event = Event()
     assert event.name() == ""
@@ -44,19 +44,19 @@ def test_simple_getters(name, start, end):
     if (start is None):
         assert event.start() == start
     else:
-        assert event.start() == start.replace(second=0).replace(microsecond=0)
+        assert event.start() == start.replace(second=0).replace(microsecond=0).astimezone()
     if (end is None):
         assert event.end() == end
     else:
-        assert event.end() == end.replace(second=0).replace(microsecond=0)
+        assert event.end() == end.replace(second=0).replace(microsecond=0).astimezone()
 
 def test_datetime_isoformat():
     name = "test 1"
     start = datetime.datetime(2025, 4, 16, 18, 28)
     end = datetime.datetime(2025, 4, 16, 19, 0)
     event = Event(name, start, end)
-    assert event.start_iso() == "2025-04-16T18:28:00"
-    assert event.end_iso() == "2025-04-16T19:00:00"
+    assert event.start_as_iso() == "2025-04-16T18:28:00+02:00"
+    assert event.end_as_iso() == "2025-04-16T19:00:00+02:00"
 
 get_as_text_test_data = [
     ("test 1", 2025, 4, 16, 18, 28, 2025, 4, 16, 19, 0, "test 1 (2025-04-16, 18:28 - 2025-04-16, 19:00)"),
@@ -98,6 +98,10 @@ def test_comparing_without_hour(name1, year, month, day, hour, minute,
     event1 = Event(name1, datetime.datetime(year, month, day, hour, minute))
     event2 = Event(name2, datetime.datetime(year2, month2, day2, hour2, minute2))
     assert event1.same_name_and_date_without_time(event2) == expected_result
+
+def test_timezone_info():
+    event = Event("test", datetime.datetime(2025, 4, 20, 18, 30), datetime.datetime(2025, 4, 20, 20, 00))
+    event.get_timezone_info()
 
 def test_list_add_get_count():
     events = EventsList()

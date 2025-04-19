@@ -51,8 +51,8 @@ class GoogleCalendar:
         events = EventsList()
         if (self.creds is not None):
             if (self.api_service_resource is not None):
-                timeMin = timeStart.isoformat(timespec='seconds')
-                timeMax = timeEnd.isoformat(timespec='seconds')
+                timeMin = Event.datetime_as_iso(timeStart)
+                timeMax = Event.datetime_as_iso(timeEnd)
                 try:
                     events_result = (
                         self.api_service_resource.events()

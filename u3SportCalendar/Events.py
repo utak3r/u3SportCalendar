@@ -61,13 +61,13 @@ class Event():
         self.the_name = name
         self.the_start = None
         if (start is not None):
-            self.the_start = start.replace(second=0).replace(microsecond=0)
+            self.the_start = start.replace(second=0).replace(microsecond=0).astimezone()
         self.the_end = None
         if (end is not None):
-            self.the_end = end.replace(second=0).replace(microsecond=0)
+            self.the_end = end.replace(second=0).replace(microsecond=0).astimezone()
         if (start is not None and end is not None):
             if (end < start):
-                self.the_end = start.replace(second=0).replace(microsecond=0)
+                self.the_end = self.the_start
                 raise EventException("End date is sooner than start date.")
             
     def toJson(self) -> str:
@@ -83,14 +83,23 @@ class Event():
     def start(self) -> datetime.datetime:
         return self.the_start
     
-    def start_iso(self) -> str:
-        return self.the_start.isoformat(timespec='seconds')
-    
     def end(self) -> datetime.datetime:
         return self.the_end
 
-    def end_iso(self) -> str:
-        return self.the_end.isoformat(timespec='seconds')
+    @classmethod
+    def datetime_as_iso(cls, date:datetime.datetime) -> str:
+        local_date = date.astimezone()
+        local_tz = local_date.tzinfo
+        utc_offset = local_tz.utcoffset(local_date)
+        utc_offset_hours = int(utc_offset.seconds / 60 / 60)
+        utc_offset_minutes = int(((utc_offset_hours * 60 * 60) - utc_offset.seconds) * 60)
+        return f"{date.isoformat(timespec='seconds')}+{utc_offset_hours:02d}:{utc_offset_minutes:02d}"
+
+    def start_as_iso(self) -> str:
+        return self.start().isoformat(timespec='seconds')
+    
+    def end_as_iso(self) -> str:
+        return self.end().isoformat(timespec='seconds')
 
     def duration(self) -> datetime.timedelta:
         duration = datetime.timedelta()
@@ -163,7 +172,7 @@ class EventsList:
 
     def trim_dates(self, days_count:int):
         if (days_count > 0):
-            today = datetime.datetime.now()
+            today = datetime.datetime.now().astimezone()
             last_date = today + datetime.timedelta(days=days_count)
             new_list = EventsList()
             for event in self:

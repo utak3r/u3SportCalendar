@@ -11,6 +11,7 @@ if __name__ == "__main__":
     config.load()
     events_calendar = config.get_events_calendar()
     days_forward = config.get_how_many_days()
+    update_hour = config.get_update_hour()
     config.save()
 
     use_google_calendar = True
@@ -32,7 +33,15 @@ if __name__ == "__main__":
             print(f"{event.get_as_text()}\n")
 
         if (use_google_calendar):
-            for event in events:
+            # download existing events from calendar
+            existing_events = calendar.get_events(
+                events_calendar, 
+                datetime.datetime.now(), 
+                datetime.datetime.now() + datetime.timedelta(days=days_forward)
+                )
+            (tobe_removed, tobe_added) = existing_events.prepare_updates_lists(events, update_hour)
+
+            for event in tobe_added:
                 calendar.insert_event(events_calendar, event)
 
 
