@@ -17,7 +17,10 @@ class Scraper:
         return random.choice(user_agents)
 
     def get_headers(self):
-        return { 'User-Agent': self.get_random_user_agent() }
+        return {
+            'User-Agent': self.get_random_user_agent(), 
+            "Referer": "https://www.google.com"
+            }
     
     def get_events_scrape(self, endpoint):
         url = f"{self.base_url}/{endpoint}"
