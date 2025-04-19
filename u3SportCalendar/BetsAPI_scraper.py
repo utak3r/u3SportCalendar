@@ -1,4 +1,5 @@
 import requests
+import random
 from bs4 import BeautifulSoup
 import datetime
 from u3SportCalendar.Events import Event, EventsList
@@ -7,22 +8,30 @@ import json
 class BetsAPIScraper:
     def __init__(self):
         self.base_url = "https://betsapi.com"
-    
+
     def get_events_scrape(self, endpoint):
         url = f"{self.base_url}/{endpoint}"
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5756.197 Safari/537.36'}
+        user_agents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0',
+            'Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16.2'
+        ]
+        random_user_agent = random.choice(user_agents)
+        headers = { 'User-Agent': random_user_agent }
         events = []
 
         soup = None
         proceed = False
-        if (0):
+        if (1):
             response = requests.get(url, headers=headers)
             if (response.status_code == 200):
-                if (0):
-                    with open("betsapi_debug.html", "w", encoding="utf-8") as debug_html_file:
+                if (1):
+                    with open("debug.html", "w", encoding="utf-8") as debug_html_file:
                         debug_html_file.write(response.text)
                         debug_html_file.close()
                 soup = BeautifulSoup(response.text, 'html.parser')
+                proceed = True
         else:
             html = None
             with open("betsapi_debug.html", "r", encoding="utf-8") as debug_html_file:
@@ -56,7 +65,7 @@ class BetsAPIScraper:
 
 
     def get_events(self, endpoint: str, events_list: EventsList):
-        if (0):
+        if (1):
             events = self.get_events_scrape(endpoint)
             for event in events:
                 teams = event[3]
