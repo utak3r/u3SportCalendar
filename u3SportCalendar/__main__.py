@@ -16,6 +16,12 @@ if __name__ == "__main__":
     use_google_calendar = True
     use_bets_scraper = True
 
+    if (use_google_calendar):
+        calendar = GoogleCalendar()
+        calendar.authorize()
+        calendar.build_service()
+
+
     if (use_bets_scraper):
         scraper = BetsAPIScraper()
         events = EventsList()
@@ -25,8 +31,12 @@ if __name__ == "__main__":
         for event in events:
             print(f"{event.get_as_text()}\n")
 
+        if (use_google_calendar):
+            for event in events:
+                calendar.insert_event(events_calendar, event)
 
-    if (use_google_calendar):
+
+"""     if (use_google_calendar):
         calendar = GoogleCalendar()
         calendar.authorize()
         calendar.build_service()
@@ -39,4 +49,4 @@ if __name__ == "__main__":
 
         if (len(events) == 0):
             print("No upcoming events found.")
-            
+ """            

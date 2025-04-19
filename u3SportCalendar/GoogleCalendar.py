@@ -40,7 +40,7 @@ class GoogleCalendar:
         else:
             print("Not authorized.")
 
-    def get_events(self, calendarId, timeStart, timeEnd):
+    def get_events(self, calendarId, timeStart:datetime.datetime, timeEnd:datetime.datetime):
         # https://developers.google.com/workspace/calendar/api/v3/reference/events/list?hl=pl
         # timeMin, timeMax - Musi być sygnaturą czasową w formacie RFC3339 
         # z obowiązkowym przesunięciem strefy czasowej, np. 
@@ -85,4 +85,33 @@ class GoogleCalendar:
             print("Not authorized.")
         
         return events
+    
+    def insert_event(self, calendarId, event:Event):
+        # TODO:
+        # Use time zone from Event class (once it's working properly...)
+        # see comment in Event.get_timezone_info()
+        html_link = ""
+        if (self.creds is not None):
+            if (self.api_service_resource is not None):
+                try:
+                    event_api = {
+                        'summary': event.name(),
+                        'start': {
+                            'dateTime': event.start().isoformat(timespec='seconds'),
+                            'timeZone': 'Europe/Warsaw'
+                        },
+                        'end': {
+                            'dateTime': event.end().isoformat(timespec='seconds'),
+                            'timeZone': 'Europe/Warsaw'
+                        }
+                    }
+                    event_result = (
+                        self.api_service_resource.events()
+                            .insert(calendarId=calendarId, body=event_api).execute()
+                        )
+                    html_link = event_result.get('htmlLink')
+                except HttpError as error:
+                    print(f"An error occurred: {error}")
+        
+        return html_link
     

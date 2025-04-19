@@ -104,6 +104,17 @@ class Event():
             self.start().date() == another.start().date()
         )
     
+    def get_timezone_info(self):
+        # TODO:
+        # For now it is returning a localized string with a full name of a time zone.
+        # What we do want instead, is a format like 'Europe/Warsaw',
+        # and not a 'Środkowoeuropejski czas letni' 
+        # (which is a full wording description uf a CET time zone)
+        local_date = self.start().astimezone()
+        local_tz = local_date.tzinfo
+        local_tzname = local_tz.tzname(local_date)
+        print(local_tzname)
+    
     def __str__(self):
         return self.get_as_text()
     
