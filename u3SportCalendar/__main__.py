@@ -4,11 +4,14 @@ import datetime
 from u3SportCalendar.AppConfig import AppConfig
 from u3SportCalendar.GoogleCalendar import GoogleCalendar
 from u3SportCalendar.BetsAPI_scraper import BetsAPIScraper
+from u3SportCalendar.Pogon_scraper import Pogon_scraper
 from u3SportCalendar.Events import Event, EventsList
 
 def create_scraper_object(api):
     if (api == "BetsAPI"):
         return BetsAPIScraper()
+    if (api == "Pogon"):
+        return Pogon_scraper()
     return None
 
 if __name__ == "__main__":
