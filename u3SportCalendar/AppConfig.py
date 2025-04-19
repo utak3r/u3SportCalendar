@@ -9,12 +9,14 @@ class AppConfig:
         self.how_many_days = self.default_how_many_days
         self.default_update_hour = True
         self.update_hour = self.default_update_hour
+        self.sources = []
 
     def save(self):
         data = {
             "events_calendar": self.events_calendar,
             "how_many_days": self.how_many_days,
-            "update_hour": self.update_hour
+            "update_hour": self.update_hour,
+            "sources": self.sources
         }
         with open(self.config_file_name, "w") as jsonfile:
             json.dump(data, jsonfile)
@@ -29,6 +31,8 @@ class AppConfig:
                 self.how_many_days = data["how_many_days"]
             if ("update_hour" in data):
                 self.update_hour = data["update_hour"]
+            if ("sources" in data):
+                self.sources = data["sources"]
             jsonfile.close()
 
     def get_events_calendar(self) -> str:
@@ -57,4 +61,13 @@ class AppConfig:
     def set_update_hour(self, update:bool):
         self.update_hour = update
 
-    
+    def add_source(self, name, api, endpoint):
+        source = {
+            "name": name,
+            "api": api,
+            "endpoint": endpoint
+        }
+        self.sources.append(source)
+
+    def get_sources(self):
+        return self.sources
