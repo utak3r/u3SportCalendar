@@ -41,6 +41,8 @@ if __name__ == "__main__":
                 )
             (tobe_removed, tobe_added) = existing_events.prepare_updates_lists(events, update_hour)
 
+            for event in tobe_removed:
+                calendar.delete_event(events_calendar, event)
             for event in tobe_added:
                 calendar.insert_event(events_calendar, event)
 

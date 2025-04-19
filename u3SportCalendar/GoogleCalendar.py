@@ -74,7 +74,8 @@ class GoogleCalendar:
                         local_tz = datetime.datetime.now().astimezone().tzinfo
                         start = start.astimezone(local_tz)
                         end = end.astimezone(local_tz)
-                        events.add_event(Event(summary, start, end))
+                        id = event["id"]
+                        events.add_event(Event(summary, start, end, id))
                         #print(f"{summary}: {start} - {end}")
 
                 except HttpError as error:
@@ -107,7 +108,8 @@ class GoogleCalendar:
                     }
                     event_result = (
                         self.api_service_resource.events()
-                            .insert(calendarId=calendarId, body=event_api).execute()
+                            .insert(calendarId=calendarId, body=event_api)
+                            .execute()
                         )
                     html_link = event_result.get('htmlLink')
                 except HttpError as error:
@@ -115,3 +117,16 @@ class GoogleCalendar:
         
         return html_link
     
+    def delete_event(self, calendarId, event:Event):
+        if (event.event_id() is not None):
+            if (self.creds is not None):
+                if (self.api_service_resource is not None):
+                    try:
+                        response = (
+                            self.api_service_resource.events()
+                                .delete(calendarId=calendarId, eventId=event.event_id())
+                                .execute()
+                        )
+                    except HttpError as error:
+                        print(f"An error occurred: {error}")
+        return response

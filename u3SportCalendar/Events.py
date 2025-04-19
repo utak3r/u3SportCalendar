@@ -25,7 +25,8 @@ class EventsEncoder(JSONEncoder):
                 "__class__": "Event",
                 "name": obj.name(),
                 "start": obj.start(),
-                "end": obj.end()
+                "end": obj.end(),
+                "event_id": obj.event_id()
             }
         if (isinstance(obj, EventsList)):
             return {
@@ -46,9 +47,14 @@ class EventsDecoder(JSONDecoder):
                 dict["h"], dict["minute"], dict["s"]
                 )
         if dict.get("__class__") == "Event":
-            return Event(
-                name=dict["name"], start=dict["start"], end=dict["end"]
-            )
+            if "event_id" in dict:
+                return Event(
+                    name=dict["name"], start=dict["start"], end=dict["end"], event_id=dict["event_id"]
+                )
+            else:
+                return Event(
+                    name=dict["name"], start=dict["start"], end=dict["end"]
+                )
         if dict.get("__class__") == "EventsList":
             lista = EventsList()
             lista.the_list = dict["events"]
@@ -57,7 +63,7 @@ class EventsDecoder(JSONDecoder):
 
 
 class Event():
-    def __init__(self, name:str="", start:datetime.datetime=None, end:datetime.datetime=None):
+    def __init__(self, name:str="", start:datetime.datetime=None, end:datetime.datetime=None, event_id=None):
         self.the_name = name
         self.the_start = None
         if (start is not None):
@@ -69,6 +75,7 @@ class Event():
             if (end < start):
                 self.the_end = self.the_start
                 raise EventException("End date is sooner than start date.")
+        self.the_event_id = event_id
             
     def toJson(self) -> str:
         return json.dumps(self, cls=EventsEncoder)
@@ -85,6 +92,9 @@ class Event():
     
     def end(self) -> datetime.datetime:
         return self.the_end
+
+    def event_id(self):
+        return self.the_event_id
 
     @classmethod
     def datetime_as_iso(cls, date:datetime.datetime) -> str:
