@@ -3,15 +3,18 @@ __version__ = "0.1.0"
 import datetime
 from u3SportCalendar.AppConfig import AppConfig
 from u3SportCalendar.GoogleCalendar import GoogleCalendar
+from u3SportCalendar.Events import Event, EventsList
 from u3SportCalendar.BetsAPI_scraper import BetsAPIScraper
 from u3SportCalendar.Pogon_scraper import Pogon_scraper
-from u3SportCalendar.Events import Event, EventsList
+from u3SportCalendar.TransferMarkt_scraper import TransferMarkt_scraper
 
 def create_scraper_object(api):
     if (api == "BetsAPI"):
         return BetsAPIScraper()
     if (api == "Pogon"):
         return Pogon_scraper()
+    if (api == "TransferMarkt"):
+        return TransferMarkt_scraper()
     return None
 
 if __name__ == "__main__":
@@ -21,8 +24,6 @@ if __name__ == "__main__":
     days_forward = config.get_how_many_days()
     update_hour = config.get_update_hour()
     sources = config.get_sources()
-    #config.add_source("Pogon", "BetsAPI", "ts/43934/Pogon-Szczecin")
-    #config.add_source("Arsenal", "BetsAPI", "ts/17230/Arsenal")
     config.save()
 
 
