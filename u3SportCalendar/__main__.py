@@ -1,56 +1,60 @@
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 import datetime
 from u3SportCalendar.AppConfig import AppConfig
 from u3SportCalendar.GoogleCalendar import GoogleCalendar
 from u3SportCalendar.Events import Event, EventsList
-from u3SportCalendar.BetsAPI_scraper import BetsAPIScraper
-from u3SportCalendar.Pogon_scraper import Pogon_scraper
 from u3SportCalendar.TransferMarkt_scraper import TransferMarkt_scraper
 
-def create_scraper_object(api):
-    if (api == "BetsAPI"):
-        return BetsAPIScraper()
-    if (api == "Pogon"):
-        return Pogon_scraper()
-    if (api == "TransferMarkt"):
-        return TransferMarkt_scraper()
-    return None
-
-if __name__ == "__main__":
-    config = AppConfig()
-    config.load()
-    events_calendar = config.get_events_calendar()
-    days_forward = config.get_how_many_days()
-    update_hour = config.get_update_hour()
-    sources = config.get_sources()
-    config.save()
-
-
+def create_and_authorize_calendar() -> GoogleCalendar:
     # Authorize Google Calendar API
     calendar = GoogleCalendar()
     calendar.authorize()
     calendar.build_service()
+    return calendar
 
+def create_scraper_object(api):
+    if (api == "TransferMarkt"):
+        return TransferMarkt_scraper()
+    return None
+
+def get_events(config:AppConfig):
     # Create scraper and get upcoming events for each defined source
     events = EventsList()
-    for source in sources:
+    for source in config.get_sources():
         scraper = create_scraper_object(source.get("api"))
         scraper.get_events(source.get("endpoint"), events)
+    
+    return events
 
-    events = events.trim_dates(days_forward)
-    for event in events:
-        print(f"{event.get_as_text()}\n")
+def process_events(config:AppConfig, events:EventsList, calendar:GoogleCalendar):
+    # Trim events between today and defined days forward
+    events = events.trim_dates(config.get_how_many_days())
 
-    # download existing events from calendar
+    # Download existing events from calendar
     existing_events = calendar.get_events(
-        events_calendar, 
+        config.get_events_calendar(), 
         datetime.datetime.now(), 
-        datetime.datetime.now() + datetime.timedelta(days=days_forward)
+        datetime.datetime.now() + datetime.timedelta(days=config.get_how_many_days())
         )
-    (tobe_removed, tobe_added) = existing_events.prepare_updates_lists(events, update_hour)
+    # Compare the two lists and check what to add and what to update
+    (tobe_removed, tobe_added) = existing_events.prepare_updates_lists(events, config.get_update_hour())
 
+    return (tobe_removed, tobe_added)
+
+def add_events_to_calendar(tobe_added, tobe_removed, calendar:GoogleCalendar, events_calendar):
     for event in tobe_removed:
         calendar.delete_event(events_calendar, event)
     for event in tobe_added:
         calendar.insert_event(events_calendar, event)
+    return
+
+if __name__ == "__main__":
+    config = AppConfig()
+    config.load()
+    #config.save()
+
+    calendar = create_and_authorize_calendar()
+    events = get_events(config)
+    (tobe_removed, tobe_added) = process_events(config, events, calendar)
+    add_events_to_calendar(tobe_added, tobe_removed, calendar, config.get_events_calendar())
